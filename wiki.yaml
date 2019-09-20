@@ -1,0 +1,65 @@
+- hosts: web
+  name: install wiki
+  vars:
+    packages:
+      - httpd
+      - mariadb-server
+      - MySQL-python
+      - php
+      - php-mysql
+      - php-pdo
+      - php-gd
+      - php-mbstring
+      - php-intl
+      - texlive
+      - php-xml
+      - epel-release
+  tasks:
+    - name: firewall config
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+      notify: firewalld reload
+    - name: install remi repo
+      yum:
+        name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+        state: present
+    - name: install packages
+      yum:
+        name: '{{ item }}'
+        state: installed
+        enablerepo: remi-php73
+        disablerepo: remi-php54
+      with_items:
+        - '{{ packages }}'
+    - name: start httpd and mysqld
+      service:
+        name: '{{ item }}'
+        enabled: yes
+        state: started
+      with_items:
+        - httpd
+        - mariadb
+    - name: Check if archive already present
+      stat:
+        path: /var/www/html/mediawki-1.33.0
+      register: result
+    - name: Download mediawiki and extract it to html folder
+      unarchive:
+        src: https://releases.wikimedia.org/mediawiki/1.33/mediawiki-core-1.33.0.tar.gz
+        dest: /var/www/html
+        remote_src: yes
+      when: not result.stat.exists
+    - name: Add database for wiki
+      mysql_db:
+        name: mediawiki
+        state: present
+    - name: create user for db
+      mysql_user:
+        name: mediawiki
+        password: mediawiki
+        priv: mediawiki.*:ALL
+        state: present
+    - name: firewalld reload
+      command: firewall-cmd --reload
