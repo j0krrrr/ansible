@@ -1,0 +1,104 @@
+- name: install wordpress
+  hosts: web
+  vars:
+    document_root: /var/www/html/wordpress
+    domain_name: test.mgdsw.info
+    packages:
+      - httpd
+      - mariadb
+      - mariadb-server
+      - MySQL-python
+      - php
+      - php-common
+      - php-mysql
+      - php-gd
+      - php-xml
+      - php-mbstring
+      - php-mcrypt
+  tasks:
+    - name: open firewall
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+      notify: firewalld reload
+    - name: install remi
+      yum:
+        name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+        state: present
+    - name: install packages
+      yum:
+        name: '{{ item }}'
+        state: present
+        enablerepo: remi-php73
+        disablerepo: remi-php54
+      with_items:
+        - '{{ packages }}'
+    - name: start services
+      service:
+        name: '{{ item }}'
+        state: started
+        enabled: yes
+      with_items:
+        - httpd
+        - mariadb
+    - name: create database
+      mysql_db:
+        name: wordpress
+        state: present
+    - name: create user
+      mysql_user:
+        name: wordpress
+        password: wordpress
+        priv: wordpress.*:ALL
+        state: present
+    - name: check if wp already there before downloading archive
+      stat:
+        path: '{{ document_root }}'
+      register: result
+    - name: download archive
+      unarchive:
+        src: http://wordpress.org/latest.tar.gz
+        dest: /var/www/html
+        remote_src: yes
+      when: not result.stat.exists
+    - name: set apache as owner
+      file:
+        dest: '{{ document_root }}'
+        owner: apache
+        recurse: yes
+    - name: create vhost
+      template:
+        src: vhost.j2
+        dest: /etc/httpd/conf.d/{{ domain_name }}.conf
+      notify: restart httpd
+    - name: create wp-config.php
+      copy:
+        src: '{{ document_root }}/wp-config-sample.php'
+        dest: '{{ document_root }}/wp-config.php'
+        remote_src: yes
+    - name: update db details
+      lineinfile:
+        path: '{{ document_root }}/wp-config.php'
+        regexp: '{{ item.From }}'
+        line: '{{ item.To }}'
+        state: present
+      with_items:
+        - From: 'database_name_here'
+          To: 'wordpress'
+        - From: 'username_here'
+          To: 'wordpress'
+        - From: 'password_here'
+          To: 'wordpress'
+    - name: set fs_method
+      lineinfile:
+        path: '{{ document_root }}/wp-config.php'
+        line: define('FS_METHOD','direct');
+    - name: firewalld reload
+      command: firewall-cmd --reload
+
+  handlers:
+    - name: restart httpd
+      service:
+        name: httpd
+        state: restarted
