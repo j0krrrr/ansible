@@ -20,8 +20,9 @@
       firewalld:
         service: http
         permanent: true
+        immediate: true
         state: enabled
-      notify: firewalld reload
+#      notify: firewalld reload
     - name: install remi
       yum:
         name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
@@ -84,21 +85,24 @@
         line: '{{ item.To }}'
         state: present
       with_items:
-        - From: 'database_name_here'
-          To: 'wordpress'
-        - From: 'username_here'
-          To: 'wordpress'
-        - From: 'password_here'
-          To: 'wordpress'
-    - name: set fs_method
-      lineinfile:
-        path: '{{ document_root }}/wp-config.php'
-        line: define('FS_METHOD','direct');
-    - name: firewalld reload
-      command: firewall-cmd --reload
+        - From: "define\\( 'DB_NAME', '(.)+' \\);"
+          To: "define('DB_NAME', 'wordpress');"
+        - From: "define\\( 'DB_USER', '(.)+' \\);"
+          To: "define('DB_USER', 'wordpress');"
+        - From: "define\\( 'DB_PASSWORD', '(.)+' \\);"
+          To: "define('DB_PASSWORD', 'wordpress');"
+    #- name: set fs_method
+    #  lineinfile:
+    #    path: '{{ document_root }}/wp-config.php'
+    #    insertafter: ^define( 'NONCE_SALT')
+    #    state: present
+    #    line: "define('FS_METHOD','direct');"
+    #- name: firewalld reload
+    #  command: firewall-cmd --reload
 
   handlers:
     - name: restart httpd
       service:
         name: httpd
         state: restarted
+
