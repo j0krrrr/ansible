@@ -1,0 +1,24 @@
+- name: zabbix-agent
+  hosts: nodes
+  tasks:
+    - name: install repo
+      yum:
+        name: https://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-2.el7.noarch.rpm
+        state: present
+    - name: install agent
+      yum:
+        name: '{{ item }}'
+        state: installed
+      with_items:
+        - zabbix-agent
+    - name: update configuration
+      lineinfile:
+        path: '/etc/zabbix/zabbix_agentd.conf'
+        regexp: '^Server=127.0.0.1$'
+        line: 'Server=192.168.3.5'
+        state: present
+    - name: restart agent
+      service:
+        name: zabbix-agent
+        state: restarted
+        enabled: yes
