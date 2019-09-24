@@ -27,12 +27,10 @@
         state: present
     - name: install packages
       yum:
-        name: '{{ item }}'
+        name: '{{ packages }}'
         state: installed
         enablerepo: remi-php73
         disablerepo: remi-php54
-      with_items:
-        - '{{ packages }}'
     - name: start httpd and mysqld
       service:
         name: '{{ item }}'
