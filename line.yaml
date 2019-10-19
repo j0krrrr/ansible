@@ -1,0 +1,19 @@
+- name: line examples
+  hosts: all
+  tasks:
+    - name: delete a line
+      lineinfile:
+        path: /root/test123
+        state: absent
+        regexp: "^abc"
+    - name: add a line
+      lineinfile:
+        path: /root/test123
+        state: present
+        insertafter: "def"
+        line: "pqr"
+    - name: comment out jkl
+      replace:
+        dest: /root/test123
+        regexp: "^(.*123.*)$"
+        replace: '# \1'
