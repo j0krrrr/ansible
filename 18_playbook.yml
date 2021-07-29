@@ -1,0 +1,33 @@
+- name: create key
+  hosts: localhost
+  tasks:
+  - name: generate SSH key
+    openssh_keypair:
+      path: /tmp/xavki
+      type: rsa
+      size: 4096
+      state: present
+      force: no
+
+- name: create user and deploy key
+  hosts: all
+  become: yes
+  tasks:
+  - name: create user
+    user:
+      name: devops
+      shell: /bin/bash
+      groups: sudo
+      append: yes
+      password: "{{ 'password' | password_hash('sha512') }}"
+  - name: sudo no pass
+    copy:
+      dest: /etc/sudoers.d/devops
+      content: "devops ALL=(ALL) NOPASSWD: ALL"
+  - name: deploy SSH key
+    authorized_key:
+      user: devops
+      key: "{{ lookup('file','/tmp/xavki.pub') }}"
+      state: present
+      comment: 'test'
+

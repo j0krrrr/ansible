@@ -1,0 +1,11 @@
+- name: facts
+  hosts: all
+  gather_facts: no
+  tasks:
+  - name: setup
+    setup:
+      filter: ansible_user*
+    register: __my_facts
+  - name: debug
+    debug:
+      var: __my_facts

@@ -1,0 +1,5 @@
+all:
+  hosts:
+    devans2:
+    devans3:
+    devans4:

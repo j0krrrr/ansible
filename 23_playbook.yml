@@ -1,0 +1,41 @@
+- name: playbook 23
+  hosts: all
+  become: yes
+  vars:
+    nginx_port: 8888
+  tasks:
+  - name: install nginx
+    apt:
+      name: nginx, curl
+      state: present
+      cache_valid_time: 3600
+      update_cache: yes
+  - name: start nginx
+    service:
+      name: nginx
+      state: started
+  - name: remove default conf
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - "/etc/nginx/sites-available/default"
+      - "/etc/nginx/sites-enabled/default"
+  - name: install vhost
+    template:
+      src: default_vhost_conf.j2
+      dest: /etc/nginx/sites-available/default-vhost.conf
+      owner: root
+      group: root
+      mode: 0644
+    notify: reload_nginx
+  - name: activate vhost
+    file:
+      src: /etc/nginx/sites-available/default-vhost.conf
+      dest: /etc/nginx/sites-enabled/default-vhost.conf
+      state: link
+  handlers:
+  - name: reload_nginx
+    systemd:
+      name: nginx
+      state: reloaded

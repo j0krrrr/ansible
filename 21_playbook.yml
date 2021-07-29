@@ -1,0 +1,8 @@
+- name: fetch
+  hosts: all
+  tasks:
+  - name: user the fetch module
+    fetch:
+      src: /etc/hosts
+      dest: /tmp/{{ ansible_hostname }}_hosts
+      flat: yes

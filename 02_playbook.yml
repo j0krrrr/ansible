@@ -1,0 +1,32 @@
+- name: my second playbook
+  hosts: all
+  #vars:
+  #  my_list:
+  #  - { dir: "xavki1", file: "fileA" }
+  #  - { dir: "xavki2", file: "fileB" }
+  #  - { dir: "xavki3", file: "fileC" }
+  #  - { dir: "xavki4", file: "fileD" }
+  tasks:
+  - name: create files from local files
+    file:
+      path: "/tmp/{{ item }}"
+      state: touch
+    with_fileglob:
+    - files/file*.yml
+
+  #- name: create some dirs
+  #  file:
+  #    path: /tmp/xavki/{{ item }}
+  #    state: directory
+  #    recurse: yes
+  #  with_items:
+  #  - xavki1
+  #  - xavki2
+  #  - xavki3
+  #  - xavki4
+  #- name: create files in the dirs
+  #  file:
+  #    path: /tmp/xavki/{{ item.dir }}/{{ item.file }}
+  #    state: touch
+  #  with_items:
+  #  - "{{ my_list }}"

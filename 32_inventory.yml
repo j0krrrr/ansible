@@ -1,0 +1,10 @@
+all:
+  children:
+    monitor:
+      hosts:
+        devans2:
+    others:
+      hosts:
+        devans3:
+        devans4:
+        devans5:

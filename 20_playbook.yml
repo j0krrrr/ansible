@@ -1,0 +1,10 @@
+- name: copy
+  hosts: all
+  tasks:
+  - name: copy
+    copy:
+      content: |
+        Hi all
+        {{ ansible_hostname }}
+      dest: /tmp/one
+      

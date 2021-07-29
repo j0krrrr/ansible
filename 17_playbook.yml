@@ -1,0 +1,26 @@
+- name: reboot
+  hosts: all
+  become: yes
+  tasks:
+  - name: create a file
+    file:
+      path: /tmp/xavki.txt
+      state: touch
+  - name: check for file
+    stat:
+      path: /tmp/xavki.txt
+    register: __file_exist
+  - name: reboot if file exists
+    reboot:
+      msg: "Rebooting...."
+      connect_timeout: 5
+      reboot_timeout: 300
+      pre_reboot_delay: 0
+      post_reboot_delay: 30
+      test_command: uptime
+    when: __file_exist.stat.exists
+  - name: this is the task after reboot
+    file:
+      path: /tmp/xavik2.txt
+      state: touch
+   

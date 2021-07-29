@@ -1,0 +1,21 @@
+- name: my first playbook
+  hosts: all
+  tasks:
+#  - name: create a file
+#    file:
+#      path: /tmp/xavki.txt
+#      state: touch
+  - name: stat the file
+    stat:
+      path: /tmp/xavki.txt
+    register: __file_xavki
+
+  - name: debug
+    debug:
+      var: __file_xavki.stat.exists
+
+  - name: create directory
+    file:
+      path: /tmp/mydir
+      state: directory
+    when: __file_xavki.stat.exists  

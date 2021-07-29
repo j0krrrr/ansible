@@ -1,0 +1,11 @@
+- name: my 3rd playbook
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: update cache
+    apt:
+      name: haproxy
+      state: absent
+#      update_cache: yes
+#      cache_valid_time: 3600

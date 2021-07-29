@@ -1,0 +1,11 @@
+- name: generate local ssh key
+  hosts: localhost
+  connection: local
+  roles:
+  - ssh_keygen
+- name: create and deploy a key
+  hosts: all
+  become: yes
+  roles:
+  - manage_users
+  - nginx_webserver

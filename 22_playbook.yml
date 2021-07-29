@@ -1,0 +1,9 @@
+- name: Jinja
+  hosts: all
+  vars:
+    var1: "Xavier !!!"
+  tasks:
+  - name: My Template
+    template:
+      src: montemplate.j2
+      dest: /tmp/hello.txt

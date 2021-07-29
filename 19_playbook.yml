@@ -1,0 +1,7 @@
+- name: delegation
+  hosts: all
+  tasks:
+  - name: delegation
+    debug:
+      var: var1
+    delegate_to: localhost
